@@ -27,6 +27,9 @@
     "dotenv",
     "config"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "Ivan Apostolovski",
   "license": "ISC",
   "devDependencies": {
