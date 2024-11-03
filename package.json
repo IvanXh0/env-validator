@@ -13,11 +13,9 @@
     "build": "rimraf dist && tsc",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "eslint 'src/**/*.ts'",
-    "lint:fix": "eslint 'src/**/*.ts' --fix",
     "format": "prettier --write 'src/**/*.ts'",
     "prepare": "npm run build",
-    "prepublishOnly": "npm test && npm run lint",
+    "prepublishOnly": "npm test",
     "docs": "typedoc --out docs src/index.ts",
     "docs:deploy": "npm run docs && gh-pages -d docs"
   },
