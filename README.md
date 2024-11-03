@@ -19,6 +19,8 @@ npm install @xho/env-validator
 
 ## Quick Start
 
+### Basic Usage
+
 ```typescript
 import { EnvValidator } from "@xho/env-validator";
 
@@ -58,6 +60,57 @@ try {
   }
   process.exit(1);
 }
+```
+
+### Schema Builder Pattern (Recommended)
+
+```typescript
+import { env, defineSchema, EnvValidator } from "@xho/env-validator";
+
+// Define reusable validators
+const portValidator = (value: number) => value >= 1000 && value <= 65535;
+const urlValidator = (value: string) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:"; // Ensure HTTPS
+  } catch {
+    return false;
+  }
+};
+
+// Define configuration sections
+const databaseConfig = {
+  DATABASE_URL: env.url({
+    required: true,
+    validator: urlValidator,
+  }),
+  DB_POOL_SIZE: env.number({
+    default: 20,
+    validator: (value) => value >= 5 && value <= 100,
+  }),
+};
+
+const appConfig = {
+  NODE_ENV: env.string({
+    required: true,
+    validator: (value) => ["development", "production"].includes(value),
+  }),
+  PORT: env.number({
+    default: 3000,
+    validator: portValidator,
+  }),
+};
+
+// Combine configurations
+const schema = defineSchema({
+  ...appConfig,
+  ...databaseConfig,
+});
+
+const env = EnvValidator.validate(schema);
+// env.PORT is typed as number
+// env.DATABASE_URL is typed as string
+// env.DB_POOL_SIZE is typed as number
 ```
 
 ## API Reference

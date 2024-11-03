@@ -1,36 +1,35 @@
-/** Supported environment variable types */
-export type EnvVarType =
-  | "string"
-  | "number"
-  | "boolean"
-  | "url"
-  | "email"
-  | "json";
-
-/** Configuration options for environment variables */
-export interface EnvVarConfig<T = any> {
-  /** Type of the environment variable */
-  type: EnvVarType;
-  /** Whether the variable is required. Defaults to false */
-  required?: boolean;
-  /** Default value if not provided */
-  default?: T;
-  /** Custom validation function */
-  validator?: (value: T) => boolean;
-}
-
-/** Schema definition for environment variables */
-export type EnvSchema = Record<string, EnvVarConfig>;
-
-/** Inferred type from schema */
-export type ValidatedEnv<T extends EnvSchema> = {
-  [K in keyof T]: InferEnvType<T[K]>;
+/**
+ * Maps environment variable types to their TypeScript types.
+ */
+export type TypeMap = {
+  string: string;
+  number: number;
+  boolean: boolean;
+  url: string;
+  email: string;
+  json: any;
 };
 
-type InferEnvType<T extends EnvVarConfig> = T extends { type: "number" }
-  ? number
-  : T extends { type: "boolean" }
-    ? boolean
-    : T extends { type: "json" }
-      ? any
-      : string;
+export type EnvVarType = keyof TypeMap;
+
+/**
+ * Configuration options for environment variables.
+ */
+export interface EnvVarConfig<T extends EnvVarType> {
+  readonly type: T;
+  readonly required?: boolean;
+  readonly default?: TypeMap[T];
+  readonly validator?: (value: TypeMap[T]) => boolean;
+}
+
+/**
+ * Schema definition for environment variables.
+ */
+export type EnvSchema<T extends Record<string, EnvVarConfig<EnvVarType>>> = T;
+
+/**
+ * Validated environment values
+ */
+export type ValidatedEnv<T> = {
+  [K in keyof T]: T[K] extends EnvVarConfig<infer V> ? TypeMap[V] : never;
+};

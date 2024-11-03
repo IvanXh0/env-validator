@@ -1,7 +1,3 @@
 export { EnvValidator, ValidationError } from "./validator";
-export type {
-  EnvSchema,
-  EnvVarConfig,
-  EnvVarType,
-  ValidatedEnv,
-} from "./types";
+export { env, defineSchema } from "./builder";
+export type { EnvSchema, EnvVarConfig, EnvVarType } from "./types";

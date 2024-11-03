@@ -1,18 +1,7 @@
-import type { EnvSchema, EnvVarConfig, ValidatedEnv } from "./types";
-/**
- * Error thrown when environment validation fails
- * @example
- * try {
- *   EnvValidator.validate(schema);
- * } catch (error) {
- *   if (error instanceof ValidationError) {
- *     console.log(error.errors); // Array of validation errors
- *   }
- * }
- */
+import type { EnvVarConfig, ValidatedEnv, EnvVarType } from "./types";
+
 export class ValidationError extends Error {
   constructor(
-    /** Array of validation error messages */
     public readonly errors: string[],
     message: string = "Environment validation failed",
   ) {
@@ -22,21 +11,16 @@ export class ValidationError extends Error {
 }
 
 /**
- * Validates environment variables against a schema
- * @example
- * const schema = {
- *   PORT: { type: 'number', required: true },
- *   API_URL: { type: 'url', required: true }
- * } as const;
- *
- * const env = EnvValidator.validate(schema);
- * // env.PORT is typed as number
- * // env.API_URL is typed as string
+ * Environment variable validator
+ * Validates and transforms environment variables according to the schema
  */
 export class EnvValidator {
+  /**
+   * Parses and validates a single environment variable value
+   */
   private static parseValue(
     value: string | undefined,
-    config: EnvVarConfig,
+    config: EnvVarConfig<EnvVarType>,
   ): any {
     if (value === undefined) {
       if (config.required && config.default === undefined) {
@@ -79,19 +63,18 @@ export class EnvValidator {
 
   /**
    * Validates environment variables against the provided schema
-   * @param schema - Environment variable schema
-   * @param env - Environment variables object (defaults to process.env)
-   * @returns Validated environment variables
-   * @throws {ValidationError} If validation fails
    */
-  static validate<T extends EnvSchema>(
+  static validate<T extends Record<string, EnvVarConfig<EnvVarType>>>(
     schema: T,
     env: NodeJS.ProcessEnv = process.env,
   ): ValidatedEnv<T> {
     const errors: string[] = [];
     const result: Record<string, any> = {};
 
-    for (const [key, config] of Object.entries(schema)) {
+    for (const [key, config] of Object.entries(schema) as [
+      string,
+      EnvVarConfig<EnvVarType>,
+    ][]) {
       try {
         const value = EnvValidator.parseValue(env[key], config);
 
