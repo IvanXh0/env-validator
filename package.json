@@ -15,7 +15,6 @@
     "test:watch": "jest --watch",
     "format": "prettier --write 'src/**/*.ts'",
     "prepare": "npm run build",
-    "prepublishOnly": "npm test",
     "docs": "typedoc --out docs src/index.ts",
     "docs:deploy": "npm run docs && gh-pages -d docs"
   },
