@@ -8,6 +8,8 @@ A zero-dependency, type-safe environment variable validator for Node.js applicat
 - 🔒 Runtime validation of environment variables
 - ✨ Built-in validators for common types (`number`, `boolean`, `url`, `email`, `json`)
 - 🎨 Custom validation functions
+- 📝 Environment file handling (.env files)
+- 🔄 Environment synchronization across different configurations
 - 💪 Zero dependencies
 - 🔍 Detailed error messages
 
@@ -30,6 +32,7 @@ const schema = {
     required: true,
     validator: (value: string) =>
       ["development", "production", "test"].includes(value),
+    description: "Application environment (development/staging/production)",
   },
   PORT: {
     type: "number" as const,
@@ -94,6 +97,7 @@ const appConfig = {
   NODE_ENV: env.string({
     required: true,
     validator: (value) => ["development", "production"].includes(value),
+    description: "Application environment (development/staging/production)",
   }),
   PORT: env.number({
     default: 3000,
@@ -111,6 +115,68 @@ const env = EnvValidator.validate(schema);
 // env.PORT is typed as number
 // env.DATABASE_URL is typed as string
 // env.DB_POOL_SIZE is typed as number
+```
+
+### Environment File Handling
+
+```typescript
+import { env, defineSchema, EnvFileHandler } from "@xho/env-validator";
+
+const schema = defineSchema({
+  NODE_ENV: env.string({
+    default: "development",
+    description: "Current environment (development/staging/production)",
+  }),
+  PORT: env.number({
+    default: 3000,
+    description: "Port number for the server",
+  }),
+  DATABASE_URL: env.url({
+    required: true,
+    description: "PostgreSQL connection string",
+  }),
+});
+
+// Generate a documented .env.example file
+await EnvFileHandler.generateExample(schema);
+
+// Validate existing .env file
+const validation = await EnvFileHandler.validate(schema);
+if (validation.missing.length > 0) {
+  console.error("Missing required variables:", validation.missing);
+}
+if (validation.invalid.length > 0) {
+  console.error("Invalid variables:", validation.invalid);
+}
+
+// Sync environments
+await EnvFileHandler.sync(schema, ".env", [
+  ".env.development",
+  ".env.staging",
+  ".env.production",
+]);
+```
+
+Generated `.env.example` will look like:
+
+```env
+# Generated Environment Variables
+# Generated on 2024-11-04T18:30:00.000Z
+
+# Current environment (development/staging/production)
+# Type: string
+# Default: development
+NODE_ENV=development
+
+# Port number for the server
+# Type: number
+# Default: 3000
+PORT=3000
+
+# PostgreSQL connection string
+# Type: url
+# Required: true
+DATABASE_URL=https://example.com
 ```
 
 ## API Reference
@@ -139,6 +205,9 @@ interface EnvVarConfig<T = any> {
 
   // Optional custom validation function
   validator?: (value: T) => boolean;
+
+  // Description for documentation purposes
+  description?: string;
 }
 ```
 

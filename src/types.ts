@@ -20,6 +20,7 @@ export interface EnvVarConfig<T extends EnvVarType> {
   readonly required?: boolean;
   readonly default?: TypeMap[T];
   readonly validator?: (value: TypeMap[T]) => boolean;
+  readonly description?: string;
 }
 
 /**
