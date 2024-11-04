@@ -1,6 +1,6 @@
 {
   "name": "@xho/env-validator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Type-safe environment variable validator for Node.js",
   "repository": {
     "type": "git",
